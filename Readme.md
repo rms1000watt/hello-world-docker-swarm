@@ -1,8 +1,8 @@
-# Hello World Golang Redis
+# Hello World Docker Swarm
 
 ## Introduction
 
-Basic project using Golang + Redis
+Basic project using Docker Swarm
 
 ## Contents
 
@@ -54,14 +54,14 @@ docker stack ps test-stack
 docker service ls
 
 # View logs from the api server
-docker service logs test-stack_hello-world-golang-redis
+docker service logs test-stack_golang-redis-pg
 
 # Try and hit the server
-# curl http://192.168.99.105:9998/info
 curl "http://$(docker-machine ls --filter name=svc-1 -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
 curl "http://$(docker-machine ls --filter name=svc-2 -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
 curl "http://$(docker-machine ls --filter name=db-1  -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
 
-# When you're all done, delete the stack
+# When you're all done, delete the stack and the VMs
 docker stack rm test-stack
+docker-machine rm svc-1 svc-2 db-1
 ```

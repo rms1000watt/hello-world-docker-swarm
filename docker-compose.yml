@@ -1,0 +1,19 @@
+version: '3'
+services: 
+  hello-world-golang-redis:
+    container_name: hello-world-golang-redis
+    environment:
+      HWGR_LISTEN_PORT: 9998
+      HWGR_REDIS_HOST: redis
+      HWGR_REDIS_PORT: 6379
+    image: rms1000watt/hello-world-golang-redis:latest
+    ports:
+    - 9998:9998
+    depends_on:
+    - redis
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+    - 6379:6379

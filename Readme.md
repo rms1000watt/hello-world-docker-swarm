@@ -8,6 +8,7 @@ Basic project using Docker Swarm
 
 - [Build](#build)
 - [Usage](#usage)
+- [Local Test](#local-test)
 
 ## Build
 
@@ -46,6 +47,11 @@ docker-machine ssh svc-1 "docker node ls"
 # Configure yourself to talk with the master
 eval $(docker-machine env svc-1)
 
+# Label nodes
+docker node update --label-add svc=true svc-1
+docker node update --label-add svc=true svc-2
+docker node update --label-add db=true --label-add pg-master=true db-1
+
 # Deploy to swarm
 docker stack deploy -c docker-compose.yml test-stack
 
@@ -64,4 +70,18 @@ curl "http://$(docker-machine ls --filter name=db-1  -f '{{.URL}}' | awk -F'[/:]
 # When you're all done, delete the stack and the VMs
 docker stack rm test-stack
 docker-machine rm svc-1 svc-2 db-1
+
+# List volumes
+docker volume ls
+
+# Remove unused volumes
+docker volume prune
+
+# Sometimes volumes are in use with stopped containers.. docker rm those containers then docker volume prune
+```
+
+## Local Test
+
+```bash
+GLP_LISTEN_PORT=9990 GLP_REDIS_HOST=192.168.99.103 GLP_REDIS_PORT=6379 GLP_PG_HOST=192.168.99.103 GLP_PG_PORT=5432 GLP_PG_USER=postgres GLP_PG_PASS=password GLP_PG_DB=postgres go run main.go
 ```

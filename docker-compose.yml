@@ -1,4 +1,9 @@
 version: '3'
+
+volumes:
+  pg-data:
+  portainer-data:
+
 services: 
   golang-redis-pg:
     container_name: golang-redis-pg
@@ -6,14 +11,66 @@ services:
       GLP_LISTEN_PORT: 9998
       GLP_REDIS_HOST: redis
       GLP_REDIS_PORT: 6379
+      GLP_PG_HOST: pg
+      GLP_PG_PORT: 5432
+      GLP_PG_USER: postgres
+      GLP_PG_PASS: password
+      GLP_PG_DB: postgres
     image: rms1000watt/golang-redis-pg:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.svc == true
+      restart_policy:
+        condition: any
     ports:
     - 9998:9998
     depends_on:
     - redis
+    - pg
 
   redis:
     container_name: redis
-    image: redis:latest
+    image: redis:4.0.6-alpine
+    deploy:
+      placement:
+        constraints:
+          - node.labels.db == true
+      restart_policy:
+        condition: any
     ports:
     - 6379:6379
+
+  pg:
+    container_name: pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    image: postgres:9.6.6-alpine
+    deploy:
+      placement:
+        constraints:
+          - node.labels.db == true
+          - node.labels.pg-master == true
+      restart_policy:
+        condition: any
+    ports:
+    - 5432:5432
+    volumes:
+    - pg-data:/var/lib/postgresql/data
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer
+    deploy:
+      placement:
+        constraints: 
+        - node.role == manager
+      restart_policy:
+        condition: any
+    ports:
+    - 9000:9000
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - portainer-data:/data

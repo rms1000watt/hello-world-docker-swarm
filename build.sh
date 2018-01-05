@@ -5,4 +5,4 @@ docker build \
   --force-rm \
   --no-cache \
   --compress \
-  -t rms1000watt/hello-world-golang-redis:latest .
+  -t rms1000watt/golang-redis-pg:latest .

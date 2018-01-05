@@ -13,6 +13,7 @@ Basic project using Golang + Redis
 
 ```bash
 ./build.sh
+docker push rms1000watt/golang-redis-pg:latest
 ```
 
 ## Usage

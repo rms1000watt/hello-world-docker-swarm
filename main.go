@@ -19,15 +19,15 @@ func main() {
 	}
 
 	fmt.Println("Starting Server")
-	listenPort := os.Getenv("HWGR_LISTEN_PORT")
+	listenPort := os.Getenv("GLP_LISTEN_PORT")
 
 	http.HandleFunc("/info", HandlerInfo)
 	http.ListenAndServe(fmt.Sprintf(":%s", listenPort), nil)
 }
 
 func connect() (err error) {
-	redisHost := os.Getenv("HWGR_REDIS_HOST")
-	redisPort := os.Getenv("HWGR_REDIS_PORT")
+	redisHost := os.Getenv("GLP_REDIS_HOST")
+	redisPort := os.Getenv("GLP_REDIS_PORT")
 
 	fmt.Println("Connecting to Redis")
 	redisConn, err = redis.Dial("tcp", fmt.Sprintf("%s:%s", redisHost, redisPort))

@@ -18,7 +18,7 @@ services:
       GLP_PG_DB: postgres
     image: rms1000watt/golang-redis-pg:latest
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
         constraints:
           - node.labels.svc == true

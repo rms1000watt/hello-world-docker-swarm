@@ -74,12 +74,13 @@ func connect() (err error) {
 
 	if _, err = pgConn.Exec(schema); err != nil {
 		fmt.Println("Failed creating table:", err)
-		return err
+		// Allow this error to happen because.. maybe the table is created already.
+		// I just need this server to run
 	}
 
 	if _, err = pgConn.Exec("INSERT INTO person (first_name, last_name, email) VALUES ($1, $2, $3)", "Ryan", "Smith", "rms1000watt@test.com"); err != nil {
 		fmt.Println("Failed inserting into table:", err)
-		return err
+		// Allow this error to happen because.. I just need this server to run
 	}
 
 	return

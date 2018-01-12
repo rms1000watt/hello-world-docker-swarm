@@ -85,7 +85,7 @@ services:
 
   traefik:
     container_name: traefik
-    command: --logLevel=DEBUG --docker --docker.swarmmode --docker.watch --web
+    command: --logLevel=DEBUG --docker --docker.swarmmode --docker.domain=traefik --docker.watch --web
     image: traefik:v1.4.6-alpine
     privileged: true
     deploy:

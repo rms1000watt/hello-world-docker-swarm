@@ -1,5 +1,9 @@
 version: '3'
 
+networks:
+  test-net:
+    external: true
+
 volumes:
   pg-data:
   portainer-data:
@@ -9,9 +13,9 @@ services:
     container_name: golang-redis-pg
     environment:
       GLP_LISTEN_PORT: 9998
-      GLP_REDIS_HOST: redis
+      GLP_REDIS_HOST: test-stack-redis.traefik
       GLP_REDIS_PORT: 6379
-      GLP_PG_HOST: pg
+      GLP_PG_HOST: test-stack-pg.traefik
       GLP_PG_PORT: 5432
       GLP_PG_USER: postgres
       GLP_PG_PASS: password
@@ -26,6 +30,11 @@ services:
         condition: any
       labels:
         traefik.port: "9998"
+        traefik.docker.network: test-net
+    networks:
+      test-net:
+        aliases:
+        - test-stack-golang-redis-pg.traefik
     ports:
     - 9998:9998
     depends_on:
@@ -43,6 +52,11 @@ services:
         condition: any
       labels:
         traefik.port: "6379"
+        traefik.docker.network: test-net
+    networks:
+      test-net:
+        aliases:
+        - test-stack-redis.traefik
     ports:
     - 6379:6379
 
@@ -61,6 +75,11 @@ services:
         condition: any
       labels:
         traefik.port: "5432"
+        traefik.docker.network: test-net
+    networks:
+      test-net:
+        aliases:
+        - test-stack-pg.traefik
     ports:
     - 5432:5432
     volumes:
@@ -77,6 +96,11 @@ services:
         condition: any
       labels:
         traefik.port: "9000"
+        traefik.docker.network: test-net
+    networks:
+      test-net:
+        aliases:
+        - test-stack-portainer.traefik
     ports:
     - 9000:9000
     volumes:
@@ -94,6 +118,8 @@ services:
         - node.role == manager
       restart_policy:
         condition: any
+    networks:
+    - test-net
     ports:
     - 80:80
     - 8080:8080

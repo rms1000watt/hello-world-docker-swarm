@@ -50,13 +50,10 @@ docker node update --label-add svc=true svc-2
 docker node update --label-add db=true --label-add pg-master=true db-1
 
 # Create a network
-docker-machine ssh manager "docker network create --driver=overlay traefik-net"
+docker network create --driver=overlay test-net
 
 # Deploy test stack to swarm
 docker stack deploy -c docker-compose.yml test-stack
-
-# Deploy dummy stack to swarm
-# docker stack deploy -c dummy.docker-compose.yml dummy-stack
 
 # View what was deployed
 docker stack ps test-stack
@@ -65,10 +62,13 @@ docker service ls
 # View logs from the api server
 docker service logs test-stack_golang-redis-pg
 
-# Try and hit the server
-curl "http://$(docker-machine ls --filter name=svc-1 -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
-curl "http://$(docker-machine ls --filter name=svc-2 -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
-curl "http://$(docker-machine ls --filter name=db-1  -f '{{.URL}}' | awk -F'[/:]' '{printf $4}'):9998/info"
+# Hit the server through the proxy
+curl -H Host:test-stack-golang-redis-pg.traefik http://$(docker-machine ip svc-1)/redis
+curl -H Host:test-stack-golang-redis-pg.traefik http://$(docker-machine ip svc-2)/redis
+curl -H Host:test-stack-golang-redis-pg.traefik http://$(docker-machine ip db-1)/redis
+
+# If you update your /etc/hosts with `192.168.99.117 test-stack-golang-redis-pg.traefik` you can: 
+# curl http://test-stack-golang-redis-pg.traefik/redis
 
 # When you're all done, delete the stack and the VMs
 docker stack rm test-stack
@@ -79,8 +79,6 @@ docker volume ls
 
 # Remove unused volumes
 docker volume prune
-
-# Sometimes volumes are in use with stopped containers.. docker rm those containers then docker volume prune
 
 # Unset the env vars so you're looking at the host docker
 eval $(docker-machine env -u)

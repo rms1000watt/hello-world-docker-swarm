@@ -29,31 +29,34 @@ docker-machine create --driver virtualbox db-1  &
 docker-machine ls
 
 # Create a Swarm Master
-printf "export MASTER_IP=%s\n" $(docker-machine ls --filter name=svc-1 -f '{{.URL}}' | awk -F'[/:]' '{printf $4}') > master-ip.sh
-docker-machine scp master-ip.sh svc-1:/home/docker/master-ip.sh
-docker-machine ssh svc-1 'eval $(cat master-ip.sh) && docker swarm init --advertise-addr $MASTER_IP' | grep "docker swarm join --token" > master-join.sh
+docker-machine ssh svc-1 "docker swarm init --listen-addr $(docker-machine ip svc-1) --advertise-addr $(docker-machine ip svc-1)"
+export WORKER_TOKEN=$(docker-machine ssh svc-1 "docker swarm join-token worker -q")
 
 # Join a 'svc' Node to the cluster
-docker-machine scp master-join.sh svc-2:/home/docker/master-join.sh
-docker-machine ssh svc-2 'sh master-join.sh'
+docker-machine ssh svc-2 "docker swarm join --token=${WORKER_TOKEN} --listen-addr $(docker-machine ip svc-2) --advertise-addr $(docker-machine ip svc-2) $(docker-machine ip svc-1)"
 
 # Join a 'db' Node to the cluster
-docker-machine scp master-join.sh db-1:/home/docker/master-join.sh
-docker-machine ssh db-1 'sh master-join.sh'
-
-# View all nodes
-docker-machine ssh svc-1 "docker node ls"
+docker-machine ssh db-1 "docker swarm join --token=${WORKER_TOKEN} --listen-addr $(docker-machine ip db-1) --advertise-addr $(docker-machine ip db-1) $(docker-machine ip svc-1)"
 
 # Configure yourself to talk with the master
 eval $(docker-machine env svc-1)
+
+# View all nodes
+docker node ls
 
 # Label nodes
 docker node update --label-add svc=true svc-1
 docker node update --label-add svc=true svc-2
 docker node update --label-add db=true --label-add pg-master=true db-1
 
-# Deploy to swarm
+# Create a network
+docker-machine ssh manager "docker network create --driver=overlay traefik-net"
+
+# Deploy test stack to swarm
 docker stack deploy -c docker-compose.yml test-stack
+
+# Deploy dummy stack to swarm
+# docker stack deploy -c dummy.docker-compose.yml dummy-stack
 
 # View what was deployed
 docker stack ps test-stack
@@ -78,6 +81,9 @@ docker volume ls
 docker volume prune
 
 # Sometimes volumes are in use with stopped containers.. docker rm those containers then docker volume prune
+
+# Unset the env vars so you're looking at the host docker
+eval $(docker-machine env -u)
 ```
 
 ## Local Test

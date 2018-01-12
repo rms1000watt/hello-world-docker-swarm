@@ -24,6 +24,8 @@ services:
           - node.labels.svc == true
       restart_policy:
         condition: any
+      labels:
+        traefik.port: "9998"
     ports:
     - 9998:9998
     depends_on:
@@ -39,6 +41,8 @@ services:
           - node.labels.db == true
       restart_policy:
         condition: any
+      labels:
+        traefik.port: "6379"
     ports:
     - 6379:6379
 
@@ -55,6 +59,8 @@ services:
           - node.labels.pg-master == true
       restart_policy:
         condition: any
+      labels:
+        traefik.port: "5432"
     ports:
     - 5432:5432
     volumes:
@@ -69,8 +75,27 @@ services:
         - node.role == manager
       restart_policy:
         condition: any
+      labels:
+        traefik.port: "9000"
     ports:
     - 9000:9000
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - portainer-data:/data
+
+  traefik:
+    container_name: traefik
+    command: --logLevel=DEBUG --docker --docker.swarmmode --docker.watch --web
+    image: traefik:v1.4.6-alpine
+    privileged: true
+    deploy:
+      placement:
+        constraints: 
+        - node.role == manager
+      restart_policy:
+        condition: any
+    ports:
+    - 80:80
+    - 8080:8080
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock

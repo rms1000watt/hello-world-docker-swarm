@@ -21,9 +21,9 @@ docker push rms1000watt/golang-redis-pg:latest
 
 ```bash
 # Start 2 service boxes and 1 db box
-docker-machine create --driver virtualbox svc-1 &
-docker-machine create --driver virtualbox svc-2 &
-docker-machine create --driver virtualbox db-1  &
+docker-machine create --driver virtualbox --virtualbox-memory "2048" --virtualbox-cpu-count "2" svc-1 &
+docker-machine create --driver virtualbox --virtualbox-memory "2048" --virtualbox-cpu-count "2" svc-2 &
+docker-machine create --driver virtualbox --virtualbox-memory "2048" --virtualbox-cpu-count "2" db-1  &
 
 # List nodes
 docker-machine ls

@@ -31,10 +31,9 @@ services:
       labels:
         traefik.port: "9998"
         traefik.docker.network: test-net
+        traefik.frontend.rule: Host:golang-redis-pg
     networks:
-      test-net:
-        aliases:
-        - test-stack-golang-redis-pg.traefik
+    - test-net
     ports:
     - 9998:9998
     depends_on:
@@ -53,10 +52,9 @@ services:
       labels:
         traefik.port: "6379"
         traefik.docker.network: test-net
+        traefik.frontend.rule: Host:redis
     networks:
-      test-net:
-        aliases:
-        - test-stack-redis.traefik
+    - test-net
     ports:
     - 6379:6379
 
@@ -76,10 +74,9 @@ services:
       labels:
         traefik.port: "5432"
         traefik.docker.network: test-net
+        traefik.frontend.rule: Host:pg
     networks:
-      test-net:
-        aliases:
-        - test-stack-pg.traefik
+    - test-net
     ports:
     - 5432:5432
     volumes:
@@ -97,10 +94,9 @@ services:
       labels:
         traefik.port: "9000"
         traefik.docker.network: test-net
+        traefik.frontend.rule: Host:portainer
     networks:
-      test-net:
-        aliases:
-        - test-stack-portainer.traefik
+    - test-net
     ports:
     - 9000:9000
     volumes:
